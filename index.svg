@@ -285,7 +285,7 @@
   const quicklinks = $("quicklinks");
 
   const MAX_TABS = 12;
-  const CREDITS_URL = "credits.html";
+  const CREDITS_URL = "credits.svg";
 
   /* ================= search engines ================= */
   const ENGINES = {
@@ -359,7 +359,7 @@
   function hostOf(url) {
     try { return new URL(url).hostname.replace(/^www\./, ""); }
     catch (e) {
-      // relative URL like "credits.html" or "./credits.html"
+      // relative URL like "credits.svg" or "./credits.svg"
       const file = url.split("/").pop().split("?")[0].split("#")[0];
       const name = file.replace(/\.[^.]+$/, "");
       return name ? name.charAt(0).toUpperCase() + name.slice(1) : url;
@@ -536,7 +536,7 @@
     render(tab, url);
   }
 
-  // Direct navigation — bypasses URL parsing. Used for internal pages like credits.html.
+  // Direct navigation — bypasses URL parsing. Used for internal pages like credits.svg.
   function navigateTo(tab, url) {
     if (!tab || !url) return;
     tab.history = tab.history.slice(0, tab.index + 1);
@@ -670,7 +670,7 @@
   openBtn.addEventListener("click", openExternal);
   fab.addEventListener("click", openExternal);
 
-  // Credits — loads credits.html into the current tab's iframe
+  // Credits — loads credits.svg into the current tab's iframe
   creditsBtn.addEventListener("click", () => {
     navigateTo(activeTab(), CREDITS_URL);
   });
