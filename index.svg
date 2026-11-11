@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>LumenProxy</title>
 <style>
+/*<![CDATA[*/
   :root{
     --bg:#16181D;
     --surface:#22252C;
@@ -191,6 +192,7 @@
   }
   .fab.show{display:flex;}
   .fab:hover{background:var(--surface);}
+/*]]>*/
 </style>
 </head>
 <body>
@@ -204,9 +206,9 @@
 
   <!-- toolbar -->
   <div class="toolbar">
-    <button class="icon-btn" id="backBtn" title="Back" disabled>←</button>
-    <button class="icon-btn" id="fwdBtn" title="Forward" disabled>→</button>
-    <button class="icon-btn" id="reloadBtn" title="Reload" disabled>⟳</button>
+    <button class="icon-btn" id="backBtn" title="Back" disabled="disabled">←</button>
+    <button class="icon-btn" id="fwdBtn" title="Forward" disabled="disabled">→</button>
+    <button class="icon-btn" id="reloadBtn" title="Reload" disabled="disabled">⟳</button>
     <button class="icon-btn" id="homeBtn" title="Home">⌂</button>
 
     <form class="omnibox" id="omnibox">
@@ -216,9 +218,9 @@
       <button class="go" type="submit">Go</button>
     </form>
 
-    <button class="icon-btn" id="openBtn" title="Open in new tab" disabled>↗</button>
+    <button class="icon-btn" id="openBtn" title="Open in new tab" disabled="disabled">↗</button>
 
-    <!-- Credits button (loads credits.html into the iframe) -->
+    <!-- Credits button (loads credits.svg into the iframe) -->
     <button class="icon-btn" id="creditsBtn" title="Credits">ⓘ</button>
   </div>
 
@@ -259,6 +261,7 @@
 </div>
 
 <script>
+//<![CDATA[
 (function () {
   "use strict";
 
@@ -347,8 +350,8 @@
     if (!s) return null;
     if (/^(javascript|data|vbscript|file):/i.test(s)) return null;
 
-    // Relative paths (./foo, /foo, or bare filename ending in .html)
-    if (/^(\.\/|\/)/.test(s) || /^[\w-]+\.html?$/i.test(s)) return s;
+    // Relative paths (./foo, /foo, or bare filename ending in .svg or .html)
+    if (/^(\.\/|\/)/.test(s) || /^[\w-]+\.(html?|svg)$/i.test(s)) return s;
 
     if (looksLikeUrl(s)) {
       return /^[a-z][a-z0-9+.-]*:\/\//i.test(s) ? s : "https://" + s;
@@ -702,6 +705,7 @@
   createTab();
   startInput.focus();
 })();
+//]]>
 </script>
 </body>
 </html>
