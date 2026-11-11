@@ -305,18 +305,21 @@
 
   Object.keys(ENGINES).forEach((key) => {
     const opt = createEl("option");
-    opt.value = key;
+    opt.setAttribute("value", key);
     opt.textContent = ENGINES[key].label;
     engineSelect.appendChild(opt);
   });
 
-  let engine = localStorage.getItem("lumenproxy.engine");
-  if (!ENGINES[engine]) engine = "duckduckgo";
+  let engine = "duckduckgo";
+  try {
+    const saved = localStorage.getItem("lumenproxy.engine");
+    if (saved && ENGINES[saved]) engine = saved;
+  } catch (e) {}
   engineSelect.value = engine;
 
   engineSelect.addEventListener("change", () => {
     engine = engineSelect.value;
-    localStorage.setItem("lumenproxy.engine", engine);
+    try { localStorage.setItem("lumenproxy.engine", engine); } catch (e) {}
   });
 
   /* ================= quick links ================= */
@@ -329,7 +332,7 @@
 
   QUICK.forEach((q) => {
     const b = createEl("button");
-    b.type = "button";
+    b.setAttribute("type", "button");
     b.textContent = q.label;
     b.addEventListener("click", () => navigate(activeTab(), q.url));
     quicklinks.appendChild(b);
@@ -353,7 +356,6 @@
     if (!s) return null;
     if (/^(javascript|data|vbscript|file):/i.test(s)) return null;
 
-    // Relative paths (./foo, /foo, or bare filename ending in .svg or .html)
     if (/^(\.\/|\/)/.test(s) || /^[\w-]+\.(html?|svg)$/i.test(s)) return s;
 
     if (looksLikeUrl(s)) {
@@ -365,7 +367,6 @@
   function hostOf(url) {
     try { return new URL(url).hostname.replace(/^www\./, ""); }
     catch (e) {
-      // relative URL like "credits.svg" or "./credits.svg"
       const file = url.split("/").pop().split("?")[0].split("#")[0];
       const name = file.replace(/\.[^.]+$/, "");
       return name ? name.charAt(0).toUpperCase() + name.slice(1) : url;
@@ -397,25 +398,27 @@
   /* ================= tab elements ================= */
   function buildTabEl(tab) {
     const el = createEl("div");
-    el.className = "tab";
-    el.dataset.id = String(tab.id);
+    el.setAttribute("class", "tab");
+    el.setAttribute("data-id", String(tab.id));
 
     const fav = createEl("span");
-    fav.className = "favicon emoji";
+    fav.setAttribute("class", "favicon emoji");
     fav.textContent = "🌐";
 
     const title = createEl("span");
-    title.className = "title";
+    title.setAttribute("class", "title");
     title.textContent = "New Tab";
 
     const close = createEl("button");
-    close.className = "close";
-    close.type = "button";
+    close.setAttribute("class", "close");
+    close.setAttribute("type", "button");
     close.textContent = "×";
-    close.title = "Close tab";
+    close.setAttribute("title", "Close tab");
     close.setAttribute("aria-label", "Close tab");
 
-    el.append(fav, title, close);
+    el.appendChild(fav);
+    el.appendChild(title);
+    el.appendChild(close);
 
     el.addEventListener("click", (e) => {
       if (e.target.closest(".close")) return;
@@ -437,21 +440,22 @@
     const favEl   = tab.el.querySelector(".favicon");
 
     titleEl.textContent = tab.title;
-    titleEl.title = tab.url || "";
+    titleEl.setAttribute("title", tab.url || "");
 
     if (tab.url) {
       favEl.textContent = (tab.title[0] || "?").toUpperCase();
-      favEl.classList.remove("emoji");
+      favEl.setAttribute("class", "favicon");
     } else {
       favEl.textContent = "🌐";
-      favEl.classList.add("emoji");
+      favEl.setAttribute("class", "favicon emoji");
     }
 
-    tab.el.classList.toggle("active", tab.id === state.activeId);
+    tab.el.setAttribute("class", tab.id === state.activeId ? "tab active" : "tab");
   }
 
   function updateNewTabBtn() {
-    newTabBtn.disabled = state.tabs.length >= MAX_TABS;
+    if (state.tabs.length >= MAX_TABS) newTabBtn.setAttribute("disabled", "disabled");
+    else newTabBtn.removeAttribute("disabled");
   }
 
   /* ================= tab lifecycle ================= */
@@ -508,18 +512,23 @@
     state.activeId = id;
 
     state.tabs.forEach((t) => {
-      if (t.el) t.el.classList.toggle("active", t.id === id);
-      if (t.iframe) t.iframe.hidden = t.id !== id;
+      if (t.el) {
+        t.el.setAttribute("class", t.id === id ? "tab active" : "tab");
+      }
+      if (t.iframe) {
+        if (t.id === id) t.iframe.removeAttribute("hidden");
+        else t.iframe.setAttribute("hidden", "hidden");
+      }
     });
 
     if (tab.url) {
-      startPage.hidden = true;
-      fab.classList.add("show");
+      startPage.setAttribute("hidden", "hidden");
+      fab.setAttribute("class", "fab show");
       urlInput.value = tab.url;
       lock.textContent = tab.url.startsWith("https://") ? "🔒" : "🔓";
     } else {
-      startPage.hidden = false;
-      fab.classList.remove("show");
+      startPage.removeAttribute("hidden");
+      fab.setAttribute("class", "fab");
       urlInput.value = "";
       lock.textContent = "🔍";
     }
@@ -542,7 +551,6 @@
     render(tab, url);
   }
 
-  // Direct navigation — bypasses URL parsing. Used for internal pages like credits.svg.
   function navigateTo(tab, url) {
     if (!tab || !url) return;
     tab.history = tab.history.slice(0, tab.index + 1);
@@ -554,8 +562,8 @@
   function render(tab, url) {
     if (!tab.iframe) {
       const f = createEl("iframe");
-      f.title = "Browser content";
-      f.hidden = true;
+      f.setAttribute("title", "Browser content");
+      f.setAttribute("hidden", "hidden");
       f.addEventListener("load", () => {
         tab.loading = false;
         if (state.activeId === tab.id) stopLoading();
@@ -571,15 +579,17 @@
     updateTabEl(tab);
 
     if (state.activeId === tab.id) {
-      startPage.hidden = true;
-      fab.classList.add("show");
+      startPage.setAttribute("hidden", "hidden");
+      fab.setAttribute("class", "fab show");
       urlInput.value = url;
       lock.textContent = url.startsWith("https://") ? "🔒" : "🔓";
       startLoading();
       updateNav();
     }
 
-    tab.iframe.hidden = state.activeId !== tab.id;
+    if (state.activeId === tab.id) tab.iframe.removeAttribute("hidden");
+    else tab.iframe.setAttribute("hidden", "hidden");
+
     tab.iframe.src = url;
   }
 
@@ -594,14 +604,14 @@
 
     if (tab.iframe) {
       tab.iframe.src = "about:blank";
-      tab.iframe.hidden = true;
+      tab.iframe.setAttribute("hidden", "hidden");
     }
 
     updateTabEl(tab);
 
     if (state.activeId === tab.id) {
-      startPage.hidden = false;
-      fab.classList.remove("show");
+      startPage.removeAttribute("hidden");
+      fab.setAttribute("class", "fab");
       urlInput.value = "";
       lock.textContent = "🔍";
       stopLoading();
@@ -612,10 +622,18 @@
 
   function updateNav() {
     const tab = activeTab();
-    backBtn.disabled   = !tab || tab.index <= 0;
-    fwdBtn.disabled    = !tab || tab.index >= tab.history.length - 1;
-    reloadBtn.disabled = !tab || !tab.url;
-    openBtn.disabled   = !tab || !tab.url;
+
+    if (!tab || tab.index <= 0) backBtn.setAttribute("disabled", "disabled");
+    else backBtn.removeAttribute("disabled");
+
+    if (!tab || tab.index >= tab.history.length - 1) fwdBtn.setAttribute("disabled", "disabled");
+    else fwdBtn.removeAttribute("disabled");
+
+    if (!tab || !tab.url) reloadBtn.setAttribute("disabled", "disabled");
+    else reloadBtn.removeAttribute("disabled");
+
+    if (!tab || !tab.url) openBtn.setAttribute("disabled", "disabled");
+    else openBtn.removeAttribute("disabled");
   }
 
   function openExternal() {
@@ -676,7 +694,6 @@
   openBtn.addEventListener("click", openExternal);
   fab.addEventListener("click", openExternal);
 
-  // Credits — loads credits.svg into the current tab's iframe
   creditsBtn.addEventListener("click", () => {
     navigateTo(activeTab(), CREDITS_URL);
   });
