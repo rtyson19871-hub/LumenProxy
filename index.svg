@@ -260,10 +260,13 @@
   </div>
 </div>
 
-<script>
+<script type="text/javascript">
 //<![CDATA[
 (function () {
   "use strict";
+
+  // Helper to create proper HTML elements inside an XML document
+  const createEl = (tag) => document.createElementNS("http://www.w3.org/1999/xhtml", tag);
 
   const $ = (id) => document.getElementById(id);
 
@@ -301,7 +304,7 @@
   };
 
   Object.keys(ENGINES).forEach((key) => {
-    const opt = document.createElement("option");
+    const opt = createEl("option");
     opt.value = key;
     opt.textContent = ENGINES[key].label;
     engineSelect.appendChild(opt);
@@ -325,7 +328,7 @@
   ];
 
   QUICK.forEach((q) => {
-    const b = document.createElement("button");
+    const b = createEl("button");
     b.type = "button";
     b.textContent = q.label;
     b.addEventListener("click", () => navigate(activeTab(), q.url));
@@ -393,19 +396,19 @@
 
   /* ================= tab elements ================= */
   function buildTabEl(tab) {
-    const el = document.createElement("div");
+    const el = createEl("div");
     el.className = "tab";
     el.dataset.id = String(tab.id);
 
-    const fav = document.createElement("span");
+    const fav = createEl("span");
     fav.className = "favicon emoji";
     fav.textContent = "🌐";
 
-    const title = document.createElement("span");
+    const title = createEl("span");
     title.className = "title";
     title.textContent = "New Tab";
 
-    const close = document.createElement("button");
+    const close = createEl("button");
     close.className = "close";
     close.type = "button";
     close.textContent = "×";
@@ -550,7 +553,7 @@
 
   function render(tab, url) {
     if (!tab.iframe) {
-      const f = document.createElement("iframe");
+      const f = createEl("iframe");
       f.title = "Browser content";
       f.hidden = true;
       f.addEventListener("load", () => {
